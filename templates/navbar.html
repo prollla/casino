@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">🎰 Real Dopamine Game</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGame" aria-controls="navbarGame" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarGame">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.url.path == '/' %}active{% endif %}" href="/">Slots</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.url.path.startswith('/mines') %}active{% endif %}" href="/mines">Mines</a>
+          </li>
+        </ul>
+      <div class="d-flex align-items-center text-white">
+        <span id="balance" class="me-3">Balance: $0.00</span>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#depositModal">➕</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Deposit Modal -->
+<div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="deposit-form">
+        <div class="modal-header">
+          <h5 class="modal-title">Deposit Balance</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="number" id="deposit-amount" class="form-control" placeholder="Amount" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Deposit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
