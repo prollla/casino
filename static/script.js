@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const spinSound = new Audio('/static/sounds/spin.mp3');
+    const jackpotSound = new Audio('/static/sounds/jackpot.mp3')
     fetchBalance();
     fetchBets();
 
@@ -33,12 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const isJackpot = data.slots.every(s => s === data.slots[0]);
 
         if (isJackpot) {
+            jackpotSound.currentTime = 0; // сброс позиции
+            jackpotSound.play().catch(e => console.log("Audio play failed:", e));
             slotEl.classList.add('jackpot-glow');
             jackpotWinEl.textContent = '$0';
             jackpotEl.style.display = 'block';
 
             animateJackpotWin(jackpotWinEl, data.win_amount);
-
             setTimeout(() => {
                 jackpotEl.style.display = 'none';
                 slotEl.classList.remove('jackpot-glow');
