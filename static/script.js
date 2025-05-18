@@ -1,55 +1,111 @@
-async function updateBalance() {
-    const res = await fetch('/balance');
-    const data = await res.json();
-    document.getElementById('balance').textContent = data.balance.toFixed(2);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const spinSound = new Audio('/static/sounds/spin.mp3');
+    fetchBalance();
+    fetchBets();
 
-async function makeBet() {
-    const amount = parseFloat(document.getElementById('betAmount').value);
-    if (!amount) return;
+    const betForm = document.getElementById('bet-form');
+    const depositForm = document.getElementById('deposit-form');
 
-    const res = await fetch('/bet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount })
+    betForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        spinSound.currentTime = 0; // сброс позиции
+        spinSound.play().catch(e => console.log("Audio play failed:", e));
+        const amount = parseFloat(document.getElementById('bet-amount').value);
+        if (amount <= 0) return;
+
+        const response = await fetch('/bet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.detail);
+            return;
+        }
+
+        const slotEl = document.getElementById('slot-result');
+        const jackpotEl = document.getElementById('jackpot-alert');
+        const jackpotWinEl = document.getElementById('jackpot-win');
+
+        slotEl.innerText = data.slots.join("");
+        const isJackpot = data.slots.every(s => s === data.slots[0]);
+
+        if (isJackpot) {
+            slotEl.classList.add('jackpot-glow');
+            jackpotWinEl.textContent = '$0';
+            jackpotEl.style.display = 'block';
+
+            animateJackpotWin(jackpotWinEl, data.win_amount);
+
+            setTimeout(() => {
+                jackpotEl.style.display = 'none';
+                slotEl.classList.remove('jackpot-glow');
+            }, 4000);
+        }
+
+        fetchBalance();
+        fetchBets();
     });
 
-    const data = await res.json();
-    document.getElementById('slots').textContent = data.slots.join('');
-    document.getElementById('resultMsg').textContent =
-        data.win_amount > 0 ? `🎉 Вы выиграли ${data.win_amount}` : '😢 Вы проиграли';
+    depositForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById('deposit-amount').value);
+        if (amount <= 0) return;
 
-    updateBalance();
-    updateBets();
-}
+        const response = await fetch('/deposit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
 
-async function deposit() {
-    const amount = parseFloat(document.getElementById('depositAmount').value);
-    if (!amount) return;
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.detail);
+            return;
+        }
 
-    await fetch('/deposit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount })
+        fetchBalance();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('depositModal'));
+        modal.hide();
+        depositForm.reset();
     });
+});
 
-    updateBalance();
+async function fetchBalance() {
+    const response = await fetch('/balance');
+    const data = await response.json();
+    document.getElementById('balance').innerText = `Balance: $${data.balance.toFixed(2)}`;
 }
 
-async function updateBets() {
-    const res = await fetch('/bets');
-    const bets = await res.json();
-    const list = document.getElementById('betsList');
-    list.innerHTML = '';
+async function fetchBets() {
+    const response = await fetch('/bets');
+    const data = await response.json();
+    const history = document.getElementById('bet-history');
+    history.innerHTML = '';
 
-    bets.slice().reverse().forEach(bet => {
-        const li = document.createElement('li');
-        li.textContent = `#${bet.id} | ${bet.result} | Ставка: ${bet.amount} | Выигрыш: ${bet.win_amount}`;
-        list.appendChild(li);
+    data.slice().reverse().forEach(bet => {
+        const item = document.createElement('li');
+        item.className = 'list-group-item';
+        item.textContent = `${bet.result} — Bet: $${bet.amount}, Win: $${bet.win_amount}`;
+        history.appendChild(item);
     });
 }
 
-window.onload = () => {
-    updateBalance();
-    updateBets();
+function animateJackpotWin(element, target) {
+    let start = 0;
+    const duration = 1500; // ms
+    const steps = 30;
+    const increment = target / steps;
+    const interval = duration / steps;
+
+    const counter = setInterval(() => {
+        start += increment;
+        if (start >= target) {
+            start = target;
+            clearInterval(counter);
+        }
+        element.textContent = `$${start.toFixed(2)}`;
+    }, interval);
 }

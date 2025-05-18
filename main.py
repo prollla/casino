@@ -59,7 +59,7 @@ def make_bet(data: AmountRequest):
     if data.amount > user.balance:
         raise HTTPException(status_code=400, detail="Not enough balance")
 
-    slots = [random.choice(["🍒", "🍋", "🍊", "⭐", "💎"]) for _ in range(3)]
+    slots = [random.choice(["🍒", "🍋", "🍊", "⭐", "💎", "💵"]) for _ in range(3)]
     win = calculate_slot_win(slots, data.amount)
     user.balance += win - data.amount
 
