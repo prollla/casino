@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Казино: Слот-машина</title>
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <h1>🎰 Слот-машина</h1>
+    <p>💰 Баланс: <span id="balance">0</span></p>
+
+    <input type="number" id="betAmount" placeholder="Ставка">
+    <button onclick="makeBet()">Сделать ставку</button>
+    <p id="slots"></p>
+    <p id="resultMsg"></p>
+
+    <hr>
+
+    <input type="number" id="depositAmount" placeholder="Пополнить баланс">
+    <button onclick="deposit()">Пополнить</button>
+
+    <hr>
+
+    <h2>История ставок</h2>
+    <ul id="betsList"></ul>
+</body>
+</html>
